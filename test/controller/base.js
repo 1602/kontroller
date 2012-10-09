@@ -7,7 +7,7 @@ its('should construct controller class', function (test) {
     test.ok((new Klass) instanceof BaseController, 'Constructed class should be child of BaseController');
     test.strictEqual(Klass.name, 'Controller');
     test.ok(Klass.prototype.render, 'instance method: render');
-    test.ok(Klass.prototype.perform, 'instance method: perform');
+    test.ok(Klass.prototype.call, 'instance method: call');
     test.ok(Klass.prototype.action, 'instance method: action');
 });
 
@@ -49,10 +49,10 @@ its('should build controller from script', function (test) {
     // now configure controller using script (running in context of controller
     // instance)
     k.reset();
-    k.build(vm.createScript(code));
+    k.build(code);
 
     // now we can create another instances (already configured)
     k2 = new K;
-    k2.perform('name');
+    k2.call('name');
 });
 
