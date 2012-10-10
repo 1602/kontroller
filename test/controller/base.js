@@ -53,6 +53,7 @@ its('should build controller from script', function (test) {
 
     // now we can create another instances (already configured)
     k2 = new K;
+    k2.initialize({}, {}, function () {});
     k2.call('name');
 });
 
