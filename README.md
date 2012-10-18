@@ -8,71 +8,6 @@ etc..
 
     npm install kontroller
 
-## Why I need it?
-
-Obviously, every additional level of logic should be added for some reason. Let
-me explain reasons of adding controller, instead of regular (in express):
-
-    app.get('info', function (req, res, next) {
-        res.render('view');
-    });
-
-Looks simple, right? But wait, let me show more real use case:
-
-    // map user profile displaying to /my-profile
-    app.get('my-profile', function (req, res, next) {
-        // show it only for users who logged in
-        if (req.session.userId) {
-            User.find(req.session.userId, function (err, user) {
-                if (err) {
-                    res.send(500);
-                } else if (!user) {
-                    res.send(404);
-                } else {
-                    User.loadTimeline(function (err, timeline) {
-                        res.render('profile', {user: user, timeline: timeline});
-                    });
-                }
-            });
-        }
-        // show 404 for others
-        else {
-            res.send(404);
-        }
-    });
-
-As you can see, we have chain of couple async queries, some of them, like user
-loading and timeline loading may be repeated in other routes, so finally it will
-look like (implementation omitted):
-
-    app.get('my-profile', loadUser, loadTimeline, renderView('profile'));
-    app.get('my-profile/edit', loadUser, renderView('edit-profile'));
-    app.put('my-profile/update', loadUser, saveChanges);
-    app.get('my-profile/cancel', loadUser, renderView('confirm'));
-    app.del('my-profile/destroy', loadUser, destroyProfile);
-
-Feel something wrong about it? It's time to start worrying about code structure.
-First of all: why should I list `loadUser` each time? What if I need some more
-complicated hooks before actions? It will become unreadable mess very soon. And
-then it will be refactored somehow, which is good, but not standard. High-order
-function, wrappers, callers will be less readable, than just one action.
-
-Let's come back to our theme. As a developer I don't want to fight with code's
-groving entrophy. I just want to describe what code does. Something like:
-
-    - every action in this controller requires user before loading
-    - all actions except one should quit if user is not admin, and some of them
-      should require super-admin
-    - every post request in whole app, should be protected from request forgery
-    - ...
-
-So, idea is simple: structurize request handling logic using some objects:
-controllers. Controllers should be able to share code, define hooks, log
-information about request handling process, they should look nice and work as
-fast as simple express middleware chain (or even faster).
-
-All of these points solved using Kontroller.
-
 ## Basic usage (ExpressJS example)
 
     // create some controller
@@ -99,7 +34,7 @@ All of these points solved using Kontroller.
     // run, test
     app.listen(3000);
 
-## Not impressed?
+## Context-free controllers
 
 There are a lot of hidden features in your new controller. You can rewrite it in
 railwayjs-style:
@@ -132,3 +67,99 @@ And use as railwayjs does it:
     app.get('/speedup', Driver('accelerate'));
     app.get('/slowdown', Driver('brake'));
 
+## Respond to specific format:
+
+    action(function index() {
+        var fruits = this.fruits = ['apple', 'banana', 'kiwi'];
+        respondTo(function (format) {
+            format.html(render);
+            format.json(function () {
+                send(fruits);
+            });
+        });
+    });
+
+Extend list of formats:
+
+    require('kontroller').Helpers.respondToFormats.push('gif', 'png', 'jpg');
+
+And then you can use it:
+
+    action(function image() {
+        respondTo(function (format) {
+            format.png(renderPNG);
+            format.jpg(renderJPG);
+            format.git(renderGIF);
+        });
+        // note: methods renderGIF, renderJPG, renderPNG aren't part of
+        // kontroller, this is just some named functions
+        // used for example
+    });
+
+## Flow control
+
+You can use hooks for specific actions / all actions
+
+    before(function () {
+        next(); // call next to get to the next hook/action
+    });
+
+Next hook only will be executed when action is `specialCase`:
+
+    before(function doSmthSpecial() {
+        next();
+    }, {only: 'specialCase'});
+
+Next hook only will be executed when action is not `publicResource`:
+
+    before(function authorizeUser() {
+        if (!session.user) {
+            redirect('/login');
+        } else {
+            next();
+        }
+    }, {except: 'publicResource'});
+
+You also can pass array of strings as `only` and `except` settings when you need
+to hook multiple actions:
+
+    // load resource before actions: show, edit, update, destroy
+    before(loadResource, {only: ['show', 'edit', 'update', 'destroy']});
+
+    // only blahBlah if action is not pipa or moka
+    before(blahBlah, {except: ['pipa', 'moka']});
+
+## Controllers pool
+
+Controllers produced via `kontroller` designed to be fast as possible. Every
+controller instance could be reused multiple times (to save time for it's
+instantiation and reduce memory usage). This trick allows to save same
+performance level as it would be for just function, and not separate object
+
+The only problem here in concurrent requests. Obviously, concurrent requests
+should be handled using different controller instances, so we have pool for
+controllers. When request comes, firts of all we trying to pull controller from
+the pool, and only if pool is empty - creating new instance. After request
+handling is completed - controller instance pushed back to pool.
+
+# MIT License
+
+    Copyright (C) 2011 by Anatoliy Chakkaev
+    
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+    
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
