@@ -1,8 +1,9 @@
 ## About
 
-It's controller. Was born in [railwayjs](http://railwayjs.com). Now it's old
-enough to leave family, and work with another guys, like exress, socket.io,
-etc..
+Controllers used in CompoundJS. Could be used separately. This package provides
+efficient way of describing controllers, it works insanely fast (sometimes
+even faster then manually written express controller). Optimized for high
+performance.
 
 ## Installation
 
@@ -37,7 +38,7 @@ etc..
 ## Context-free controllers
 
 There are a lot of hidden features in your new controller. You can rewrite it in
-railwayjs-style:
+compoundjs-style:
 
     before(think, {only: 'accelerate'});
 
@@ -54,7 +55,7 @@ railwayjs-style:
         setTimeout(next, 1000);
     }
 
-And use as railwayjs does it:
+And use as compoundjs does it:
 
     // create blank controller
     var Driver = BaseController.constructClass('Driver');
@@ -145,17 +146,17 @@ handling is completed - controller instance pushed back to pool.
 # MIT License
 
     Copyright (C) 2011 by Anatoliy Chakkaev
-    
+
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
     in the Software without restriction, including without limitation the rights
     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
     copies of the Software, and to permit persons to whom the Software is
     furnished to do so, subject to the following conditions:
-    
+
     The above copyright notice and this permission notice shall be included in
     all copies or substantial portions of the Software.
-    
+
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
