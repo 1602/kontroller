@@ -1,3 +1,3 @@
-action '{{ ACTION }}', ->
+action 'ACTION', ->
   render
-    title: "{{ CONTROLLER }}#{{ ACTION }}"
+    title: "CONTROLLER#ACTION"
