@@ -1,6 +1,6 @@
 {
   "name": "kontroller",
-  "version": "0.0.8-2",
+  "version": "0.0.9-0",
   "description": "Just controller",
   "main": "index.js",
   "scripts": {
