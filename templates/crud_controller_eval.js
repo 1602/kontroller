@@ -1,50 +1,50 @@
 load('application');
 
-before(loadModel, {
+before(load{{ Model }}, {
     only: ['show', 'edit', 'update', 'destroy']
     });
 
 action('new', function () {
-    this.title = 'New model';
-    this.model = new Model;
+    this.title = 'New {{ model }}';
+    this.{{ model }} = new {{ Model }};
     render();
 });
 
 action(function create() {
-    Model.create(req.body.Model, function (err, model) {
+    {{ Model }}.create(req.body.{{ Model }}, function (err, {{ model }}) {
         if (err) {
-            flash('error', 'Model can not be created');
+            flash('error', '{{ Model }} can not be created');
             render('new', {
-                model: model,
-                title: 'New model'
+                {{ model }}: {{ model }},
+                title: 'New {{ model }}'
             });
         } else {
-            flash('info', 'Model created');
-            redirect(path_to.models);
+            flash('info', '{{ Model }} created');
+            redirect(path_to.{{ models }});
         }
     });
 });
 
 action(function index() {
-    this.title = 'Models index';
-    Model.all(function (err, models) {
+    this.title = '{{ Model }}s index';
+    {{ Model }}.all(function (err, {{ models }}) {
         switch(params.format) {
             case "json":
-                send(models);
+                send({{ models }});
                 break;
             default:
                 render({
-                    models: models
+                    {{ models }}: {{ models }}
                 });
         }
     });
 });
 
 action(function show() {
-    this.title = 'Model show';
+    this.title = '{{ Model }} show';
     switch(params.format) {
         case "json":
-            send(this.model);
+            send(this.{{ model }});
             break;
         default:
             render();
@@ -52,10 +52,10 @@ action(function show() {
 });
 
 action(function edit() {
-    this.title = 'Model edit';
+    this.title = '{{ Model }} edit';
     switch(params.format) {
         case "json":
-            send(this.model);
+            send(this.{{ model }});
             break;
         default:
             render();
@@ -63,35 +63,35 @@ action(function edit() {
 });
 
 action(function update() {
-    this.model.updateAttributes(body.Model, function (err) {
+    this.{{ model }}.updateAttributes(body.{{ Model }}, function (err) {
         if (!err) {
-            flash('info', 'Model updated');
-            redirect(path_to.model(this.model));
+            flash('info', '{{ Model }} updated');
+            redirect(path_to.{{ model }}(this.{{ model }}));
         } else {
-            flash('error', 'Model can not be updated');
-            this.title = 'Edit model details';
+            flash('error', '{{ Model }} can not be updated');
+            this.title = 'Edit {{ model }} details';
             render('edit');
         }
     }.bind(this));
 });
 
 action(function destroy() {
-    this.model.destroy(function (error) {
+    this.{{ model }}.destroy(function (error) {
         if (error) {
-            flash('error', 'Can not destroy model');
+            flash('error', 'Can not destroy {{ model }}');
         } else {
-            flash('info', 'Model successfully removed');
+            flash('info', '{{ Model }} successfully removed');
         }
-        send("'" + path_to.models + "'");
+        send("'" + path_to.{{ models }} + "'");
     });
 });
 
-function loadModel() {
-    Model.find(params.id, function (err, model) {
-        if (err || !model) {
-            redirect(path_to.models);
+function load{{ Model }}() {
+    {{ Model }}.find(params.id, function (err, {{ model }}) {
+        if (err || !{{ model }}) {
+            redirect(path_to.{{ models }});
         } else {
-            this.model = model;
+            this.{{ model }} = {{ model }};
             next();
         }
     }.bind(this));

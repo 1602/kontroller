@@ -1,3 +1,3 @@
 load('application');
 
-ACTIONS
+{{ ACTIONS }}

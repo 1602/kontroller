@@ -1,5 +1,5 @@
-action('ACTION', function () {
+action('{{ ACTION }}', function () {
   render({
-    title: "CONTROLLER#ACTION"
+    title: "{{ CONTROLLER }}#{{ ACTION }}"
   });
 });
