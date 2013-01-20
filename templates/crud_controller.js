@@ -18,16 +18,27 @@ require('util').inherits({{ Models }}Controller, Application);
 
 {{ Models }}Controller.prototype.create = function create(c) {
     c.{{ Model }}.create(c.body.{{ Model }}, function (err, {{ model }}) {
-        if (err) {
-            c.flash('error', '{{ Model }} can not be created');
-            c.render('new', {
-                {{ model }}: {{ model }},
-                title: 'New {{ model }}'
+        c.respondTo(function (format) {
+            format.json(function () {
+                if (err) {
+                    c.send({code: 500, error: err});
+                } else {
+                    c.send({code: 200, data: {{ model }}.toObject()});
+                }
             });
-        } else {
-            c.flash('info', '{{ Model }} created');
-            c.redirect(c.pathTo.{{ models }});
-        }
+            format.html(function () {
+                if (err) {
+                    c.flash('error', '{{ Model }} can not be created');
+                    c.render('new', {
+                        {{ model }}: {{ model }},
+                        title: 'New {{ model }}'
+                    });
+                } else {
+                    c.flash('info', '{{ Model }} created');
+                    c.redirect(c.pathTo.{{ models }});
+                }
+            });
+        });
     });
 };
 
@@ -36,7 +47,13 @@ require('util').inherits({{ Models }}Controller, Application);
     c.{{ Model }}.all(function (err, {{ models }}) {
         c.respondTo(function (format) {
             format.json(function () {
-                c.send({{ models }});
+                c.send(err ? {
+                    code: 500,
+                    error: err
+                }: {
+                    code: 200,
+                    data: {{ models }}
+                });
             });
             format.html(function () {
                 c.render({
@@ -49,10 +66,13 @@ require('util').inherits({{ Models }}Controller, Application);
 
 {{ Models }}Controller.prototype.show = function show(c) {
     this.title = '{{ Model }} show';
-    var {{ models }} = this.{{ model }};
+    var {{ model }} = this.{{ model }};
     c.respondTo(function (format) {
         format.json(function () {
-            c.send({{ model }});
+            c.send({
+                code: 200,
+                data: {{ model }}
+            });
         });
         format.html(function () {
             c.render();
@@ -82,7 +102,7 @@ require('util').inherits({{ Models }}Controller, Application);
                 } else {
                     c.send({
                         code: 200,
-                        {{ model }}: {{ model }}.toObject()
+                        data: {{ model }}.toObject()
                     });
                 }
             });
@@ -102,12 +122,26 @@ require('util').inherits({{ Models }}Controller, Application);
 
 {{ Models }}Controller.prototype.destroy = function destroy(c) {
     this.{{ model }}.destroy(function (error) {
-        if (error) {
-            c.flash('error', 'Can not destroy {{ model }}');
-        } else {
-            c.flash('info', '{{ Model }} successfully removed');
-        }
-        c.send("'" + c.pathTo.{{ models }} + "'");
+        c.respondTo(function (format) {
+            format.json(function () {
+                if (error) {
+                    c.send({
+                        code: 500,
+                        error: error
+                    });
+                } else {
+                    c.send({code: 200});
+                }
+            });
+            format.html(function () {
+                if (error) {
+                    c.flash('error', 'Can not destroy {{ model }}');
+                } else {
+                    c.flash('info', '{{ Model }} successfully removed');
+                }
+                c.send("'" + c.pathTo.{{ models }} + "'");
+            });
+        });
     });
 };
 
@@ -115,6 +149,9 @@ function load{{ Model }}(c) {
     var self = this;
     c.{{ Model }}.find(c.params.id, function (err, {{ model }}) {
         if (err || !{{ model }}) {
+            if (!err && !{{ model }} && c.params.format === 'json') {
+                return c.send({code: 404, error: 'Not found'});
+            }
             c.redirect(c.pathTo.{{ models }});
         } else {
             self.{{ model }} = {{ model }};
