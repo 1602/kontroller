@@ -3,6 +3,8 @@ Application = require './application'
 load{{ Model }} = (c) ->
   c.{{ Model }}.find c.params.id, (err, {{ model }}) =>
     if  err || !{{ model }}
+      if !err && !{{ model }} && c.params.format === 'json'
+        return c.send code: 404, error: 'Not found'
       c.redirect c.pathTo.{{ models }}
     else
       @{{ model }} = {{ model }}
@@ -32,14 +34,21 @@ require('util').inherits {{ Models }}Controller, Application
 #
 {{ Models }}Controller.prototype.create = (c) ->
   c.{{ Model }}.create c.body.{{ Model }}, (err, {{ model }}) =>
-    if err
-      @{{ model }} = {{ model }}
-      @title = 'New {{ model }}'
-      c.flash 'error', '{{ Model }} can not be created'
-      c.render 'new'
-    else
-      c.flash 'info', '{{ Model }} created'
-      c.redirect c.pathTo.{{ models }}
+    c.respodTo (format) ->
+      format.json ->
+        if err
+          c.send code: 500, error: {{ model }} && {{ model }}.errors || err
+        else
+          c.send code: 200, data: {{ model }}.toObject()
+      format.html =>
+        if err
+          @{{ model }} = {{ model }}
+          @title = 'New {{ model }}'
+          c.flash 'error', '{{ Model }} can not be created'
+          c.render 'new'
+        else
+          c.flash 'info', '{{ Model }} created'
+          c.redirect c.pathTo.{{ models }}
 
 #
 # GET {{ models }}
@@ -53,7 +62,7 @@ require('util').inherits {{ Models }}Controller, Application
     c.respondTo (format) ->
 
       format.json ->
-        c.send {{ models }}
+        c.send code: 200, data: {{ models }}
 
       format.html ->
         c.render {{ models }}: {{ models }}, title: '{{ Models }} index'
@@ -66,12 +75,12 @@ require('util').inherits {{ Models }}Controller, Application
 #   - json
 #
 {{ Models }}Controller.prototype.show = (c) ->
-    c.respondTo (format) =>
-        format.json =>
-            c.send @{{ model }}
+  c.respondTo (format) =>
+    format.json =>
+      c.send code: 200, data: @{{ model }}
 
         format.html ->
-            c.render title: '{{ Model }} show'
+          c.render title: '{{ Model }} show'
 
 #
 # GET {{ models }}/:id/edit
@@ -101,7 +110,7 @@ require('util').inherits {{ Models }}Controller, Application
         else
           c.send
             code: 200
-            {{ model }}: @{{ model }}.toObject()
+            data: @{{ model }}.toObject()
 
       format.html =>
         unless err
@@ -131,9 +140,6 @@ require('util').inherits {{ Models }}Controller, Application
 
       format.json ->
         if error
-          c.send
-            code: 500
-            error: error
+          c.send code: 500, error: error
         else
-          send
-            code: 200
+          c.send code: 200
