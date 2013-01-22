@@ -32,13 +32,14 @@ action(function create() {
                     redirect(path_to.{{ models }});
                 }
             });
+        });
     });
 });
 
 action(function index() {
     this.title = '{{ Model }}s index';
     {{ Model }}.all(function (err, {{ models }}) {
-        switch(params.format) {
+        switch (params.format) {
             case "json":
                 send({code: 200, data: {{ models }}});
                 break;
@@ -74,6 +75,7 @@ action(function edit() {
 
 action(function update() {
     var {{ model }} = this.{{ model }};
+    this.title = 'Edit {{ model }} details';
     this.{{ model }}.updateAttributes(body.{{ Model }}, function (err) {
         respondTo(function (format) {
             format.json(function () {
@@ -86,14 +88,14 @@ action(function update() {
             format.html(function () {
                 if (!err) {
                     flash('info', '{{ Model }} updated');
-                    redirect(path_to.{{ model }}(this.{{ model }}));
+                    redirect(path_to.{{ model }}({{ model }}));
                 } else {
                     flash('error', '{{ Model }} can not be updated');
-                    this.title = 'Edit {{ model }} details';
                     render('edit');
                 }
             });
-    }.bind(this));
+        });
+    });
 });
 
 action(function destroy() {
@@ -121,7 +123,7 @@ action(function destroy() {
 function load{{ Model }}() {
     {{ Model }}.find(params.id, function (err, {{ model }}) {
         if (err || !{{ model }}) {
-            if (!err && !{{ model }}) {
+            if (!err && !{{ model }} && params.format === 'json') {
                 return send({code: 404, error: 'Not found'});
             }
             redirect(path_to.{{ models }});

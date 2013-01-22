@@ -3,9 +3,9 @@ load 'application'
 before 'load {{ model }}', ->
   {{ Model }}.find params.id, (err, {{ model }}) =>
     if err || !{{ model }}
-      if !err && !{{ model }} && c.params.format === 'json'
+      if !err && !{{ model }} && params.format == 'json'
         return send code: 404, error: 'Not found'
-      redirect path_to.{{ models }}
+      redirect pathTo.{{ models }}
     else
       @{{ model }} = {{ model }}
       next()
@@ -79,7 +79,7 @@ action 'update', ->
 
 action 'destroy', ->
   @{{ model }}.destroy (error) ->
-    respondTo (format) =>
+    respondTo (format) ->
       format.json ->
         if error
           send code: 500, error: error
