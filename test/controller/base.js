@@ -57,3 +57,17 @@ its('should build controller from script', function (test) {
     k2.call('name');
 });
 
+its('should call __missingAction when action is missing', function (test) {
+    test.expect(3);
+    function MyController() {
+    }
+    MyController.prototype.__missingAction = function (c) {
+        test.ok(true);
+        test.equals(c.requestedActionName, 'do strange thing');
+        test.equals(c.actionName, '__missingAction');
+    };
+    var K = BaseController.constructClass('MyController', MyController);
+
+    k = new K;
+    k.perform('do strange thing');
+});
