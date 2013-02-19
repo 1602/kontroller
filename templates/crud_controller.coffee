@@ -3,7 +3,7 @@ Application = require './application'
 load{{ Model }} = (c) ->
   c.{{ Model }}.find c.params.id, (err, {{ model }}) =>
     if  err || !{{ model }}
-      if !err && !{{ model }} && c.params.format === 'json'
+      if !err && !{{ model }} && c.params.format == 'json'
         return c.send code: 404, error: 'Not found'
       c.redirect c.pathTo.{{ models }}
     else
@@ -34,7 +34,7 @@ require('util').inherits {{ Models }}Controller, Application
 #
 {{ Models }}Controller.prototype.create = (c) ->
   c.{{ Model }}.create c.body.{{ Model }}, (err, {{ model }}) =>
-    c.respodTo (format) ->
+    c.respondTo (format) ->
       format.json ->
         if err
           c.send code: 500, error: {{ model }} && {{ model }}.errors || err
@@ -79,8 +79,8 @@ require('util').inherits {{ Models }}Controller, Application
     format.json =>
       c.send code: 200, data: @{{ model }}
 
-        format.html ->
-          c.render title: '{{ Model }} show'
+    format.html ->
+      c.render title: '{{ Model }} show'
 
 #
 # GET {{ models }}/:id/edit
