@@ -1,7 +1,7 @@
 # TESTS
 
 TESTER = ./node_modules/.bin/mocha
-OPTS = --require should
+OPTS = --require test/init.js
 TESTS = test/*.test.js
 
 test:
