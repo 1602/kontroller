@@ -16,16 +16,17 @@ describe('errors', function() {
             '});',
         ].join('\n');
 
-        // let's build basic (blank) controller class
         var K = BaseController.constructClass('MyController');
         var k = new K;
         k.reset();
         k.build(code);
-        (function() {
-            k.call('fail');
-        }).should.throw('fail is not defined in MyController controller during "fail" action');
-        (function() {
-            k.call('onhook');
-        }).should.throw('Cannot set property \'world\' of undefined in MyController controller during "hook" hook');
+        k.context.outerNext = function (e) {
+            e.message.should.equal('fail is not defined in MyController controller during "fail" action');
+        };
+        k.call('fail');
+        k.context.outerNext = function (e) {
+            e.message.should.equal('Cannot set property \'world\' of undefined in MyController controller during "hook" hook');
+        };
+        k.call('onhook');
     });
 });
