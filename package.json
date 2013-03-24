@@ -4,18 +4,18 @@
   "description": "Just controller",
   "main": "index.js",
   "scripts": {
-    "test": "nodeunit test/controller/*.js"
+    "test": "make test"
   },
   "repository": "",
   "keywords": [
-    "railway",
+    "compoundjs",
     "express",
     "controller",
     "routing"
   ],
   "author": "Anatoliy Chakkaev",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "should": "~1.2.2",
     "mocha": "~1.8.2"
   }
