@@ -23,10 +23,12 @@ describe('errors', function() {
         k.context.outerNext = function (e) {
             e.message.should.equal('fail is not defined in MyController controller during "fail" action');
         };
-        k.call('fail');
+        k.perform('fail', {}, {}, function(){});
+        k.occupied.should.be.false;
         k.context.outerNext = function (e) {
             e.message.should.equal('Cannot set property \'world\' of undefined in MyController controller during "hook" hook');
+            done();
         };
-        k.call('onhook');
+        k.perform('onhook', {}, {}, function() {});
     });
 });
